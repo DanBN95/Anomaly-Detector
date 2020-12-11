@@ -7,8 +7,6 @@ package test;
 import  java.lang.Math;
 public class StatLib {
 
-	
-
 	// simple average
 	public static float avg(float[] x){
 		float sum=0;
@@ -58,6 +56,7 @@ public class StatLib {
 			Xarry[i]=points[i].x;
 			Yarry[i]=points[i].y;
 		}
+
 		float a=cov(Xarry,Yarry)/var(Xarry);
 		float b=avg(Yarry)-a*avg(Xarry);
 		Line ln=new Line(a,b);
