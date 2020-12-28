@@ -2,54 +2,122 @@ package test;
 
 import java.io.*;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.Vector;
-
 
 public class TimeSeries {
 
-	private HashMap<String,Vector> hashMap;
-	
+	private HashMap<String, float[]> hashMap;
+	private int vector_size;
+
 	public TimeSeries(String csvFileName) {
 
-		String line="";
-		double temp;
-		int j=0;
+		int i=0;
+		int feature_index=0;
 
 		try {
-			BufferedReader br = new BufferedReader(new FileReader(csvFileName));
-			String [] features=line.split(",");
-			this.hashMap=new HashMap<String,Vector>();
-			int colSize= features.length;
-			while((line=br.readLine())!=null) {
-				String[] stringsValues = line.split(",");
-				Vector doubleValues=new Vector();
-				for (int i = 0; i < stringsValues.length; i++) {
-					temp = Double.parseDouble(stringsValues[i]);
-					doubleValues.add(temp);
+			Scanner myScanner =new Scanner(new BufferedReader(new FileReader(csvFileName)));
+			String line = myScanner.nextLine(); // read from csv file the features line
+			String [] features=line.split(","); //split the features
+			this.hashMap= new HashMap<String, float[]>();
+			Vector<Vector<Float>> wholeLines=new Vector<Vector<Float>>();
+			for(i=0;i<features.length;i++)
+				wholeLines.add(new Vector<>()); //preparing columns for each feature
+			myScanner.useDelimiter(",");
+			i=0; //initialize i
+			while(myScanner.hasNextLine()) { //as long file hasn't readed completely
+//				if (i == features.length)
+//					i = 0;
+				if(!wholeLines.isEmpty()) {
+//					wholeLines.get(i).add(myScanner.nextFloat());
+					String row = myScanner.nextLine();
+					String [] vec_by_row = row.split(",");
+					for(String s : vec_by_row) {
+						if (i == features.length)
+							i = 0;
+						wholeLines.get(i).add(Float.parseFloat(s));
+						i++;
+					}
 				}
-				hashMap.put(stringsValues[j],doubleValues);
-				j++;
+				else
+					System.out.println("wholeLines adding vectors has not successeded!");
 			}
+			if(features.length!=wholeLines.size())
+				System.out.println("Warning! size of features is not equal to size of wholeLines!");
 
+			int size = 0;
+			for(Vector<Float> v : wholeLines){ //put hash map with Key:Feature, and Vector of its column
+				size=v.size();
+				float [] featureVec = new float[size];
+				for(int j=0;j<size;j++)
+					featureVec[j]=v.get(j);
+				this.hashMap.put(features[feature_index],featureVec);
+				feature_index++;
+			}
+			setVector_size(size);
+
+			for(Vector<Float> v : wholeLines)
+				v.removeAllElements();
+			wholeLines.removeAllElements(); //removing since we already have precise float array in hashmap
+			myScanner.close();
+			//************** try to delete wholeLines since Map saves the values*************************
 		}catch(FileNotFoundException e) {
 			e.printStackTrace();
 		}catch(IOException e){
-		e.printStackTrace();}
+			e.printStackTrace();}
 	}
-public HashMap<String,Vector> getHashMap() {return this.hashMap;} //returns pointer to csv
 
-public String[] FeaturesList() { //return Keys of csv
+	public HashMap<String,float []> getHashMap() {return this.hashMap;} //returns pointer to csv
+
+	public String[] FeaturesList() { //return Keys of csv
 		String[] keys=this.hashMap.keySet().toArray(new String[hashMap.size()]);
 		return keys;
-}
-public static void addFeature(){
+	}
+
+	//return the equal size of all vectors
+	public int getSizeOfVector() {
+		return vector_size;
+	}
+
+	//set vector's size
+	public void setVector_size(int vector_size) {
+		this.vector_size = vector_size;
+	}
+	//add feature with empty vector
+	public void addFeature(String feature) {
+		this.hashMap.put(feature,new float[vector_size]);
+	}
+
+	public void addRow(String row) {
+		Scanner in = new Scanner(row);
+		int i = 0;
+		in.useDelimiter(",");
+		String[] features = FeaturesList();
+		for (float[] f : this.hashMap.values()) {
+			if (in.hasNext()) {
+				float[] temp = new float[this.vector_size + 1];
+				for (int j = 0; j < vector_size; j++)
+					temp[j] = f[j];
+				f = temp;
+				f[vector_size] = in.nextFloat();
+				this.hashMap.put(features[i], f);
+			}
+			i++;
+		} in.close();
+	}
+
+	//returns row array at index line
+	public float [] row_array (int index) {
+		float [] arr = new float[this.vector_size];
+		for(int i=0;i<this.vector_size;i++)
+			arr[i] = valueAtIndex(index,FeaturesList()[i]);
+		return arr;
+	}
+
+	//returns the value at the [timeStep][feature_key] index
+	public float valueAtIndex(int timeStep, String feature_key) {
+		return this.hashMap.get(feature_key)[timeStep];
+	}
 
 }
-public void addRow(String row){
-	String[] stringsValues = row.split(",");
-	for(this.hashMap.)
-}
-public void readCSVfromFile(File f) {
 
-}
-}
