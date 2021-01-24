@@ -61,7 +61,7 @@ public class SimpleAnomalyDetector implements TimeSeriesAnomalyDetector {
 				if (StatLib.dev(p, correlatedFeatures.lin_reg) > correlatedFeatures.threshold)
 					anomalyReportList.add(new AnomalyReport( correlatedFeatures.feature1 + "-"
 							+ correlatedFeatures.feature2, (long)i+1));
-				System.out.println(correlatedFeatures.feature1+"-"+correlatedFeatures.feature2);
+				//System.out.println(correlatedFeatures.feature1+"-"+correlatedFeatures.feature2);
 			}
 		}
 		if (anomalyReportList.isEmpty())

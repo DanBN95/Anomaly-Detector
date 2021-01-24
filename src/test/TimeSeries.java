@@ -13,34 +13,41 @@ public class TimeSeries {
 	public TimeSeries(String csvFileName) {
 
 		int i=0;
+		boolean eflag=false;
 		int feature_index=0;
-
+		int count=1;
+		Scanner myScanner=null;
 		try {
-			Scanner myScanner =new Scanner(new BufferedReader(new FileReader(csvFileName)));
+			myScanner =new Scanner(new BufferedReader(new FileReader(csvFileName)));
 			String line = myScanner.nextLine(); // read from csv file the features line
 			String [] features=line.split(","); //split the features
 			this.hashMap= new HashMap<String, float[]>();
 			Vector<Vector<Float>> wholeLines=new Vector<Vector<Float>>();
 			for(i=0;i<features.length;i++)
+
 				wholeLines.add(new Vector<>()); //preparing columns for each feature
-			myScanner.useDelimiter(",");
+
 			i=0; //initialize i
 			while(myScanner.hasNextLine()) { //as long file hasn't readed completely
-//				if (i == features.length)
-//					i = 0;
+
 				if(!wholeLines.isEmpty()) {
-//					wholeLines.get(i).add(myScanner.nextFloat());
+
 					String row = myScanner.nextLine();
 					String [] vec_by_row = row.split(",");
+					//System.out.print("line "+count+":\t");
 					for(String s : vec_by_row) {
 						if (i == features.length)
 							i = 0;
+						//System.out.print(s);
 						wholeLines.get(i).add(Float.parseFloat(s));
 						i++;
 					}
+					count++;
+					//System.out.println();
 				}
-				else
-					System.out.println("wholeLines adding vectors has not successeded!");
+				else {
+					eflag=true;
+				}
 			}
 			if(features.length!=wholeLines.size())
 				System.out.println("Warning! size of features is not equal to size of wholeLines!");
@@ -59,12 +66,18 @@ public class TimeSeries {
 			for(Vector<Float> v : wholeLines)
 				v.removeAllElements();
 			wholeLines.removeAllElements(); //removing since we already have precise float array in hashmap
-			myScanner.close();
-			//************** try to delete wholeLines since Map saves the values*************************
-		}catch(FileNotFoundException e) {
+
+		} catch(IOException e) {
 			e.printStackTrace();
-		}catch(IOException e){
-			e.printStackTrace();}
+		}
+		finally {
+			try {
+				if(myScanner!=null)
+					myScanner.close();
+			}catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public HashMap<String,float []> getHashMap() {return this.hashMap;} //returns pointer to csv
